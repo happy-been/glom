@@ -972,7 +972,7 @@ class Check:
             if self.default is not RAISE:
                 return arg_val(target, self.default, scope)
             if len(self.vals) == 1:
-                errs.append(f"expected {self.vals[0]}, found {target}")
+                errs.append(f"expected {next(iter(self.vals))}, found {target}")
             else:
                 errs.append(f'expected one of {self.vals}, found {target}')
 

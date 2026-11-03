@@ -1,4 +1,4 @@
-from pytest import raises
+from pytest import raises, mark
 
 from glom import glom, Check, CheckError, Coalesce, SKIP, STOP, T
 
@@ -75,6 +75,25 @@ def test_check_multi():
         glom(target, Check(instance_of=float, validate=lambda x: x > 3.14))
 
     assert "2 errors" in str(exc_info.value)
+
+
+@mark.parametrize('choices', [
+    {1}, frozenset({1}), {1: 'ignored'}, {1: None}.keys(), [1], (1,),
+])
+def test_check_single_choice_iterables(choices):
+    check = Check(one_of=choices)
+    assert glom(1, check) == 1
+    with raises(CheckError) as exc_info:
+        glom(2, check)
+    assert exc_info.value.msgs == ['expected 1, found 2']
+    assert glom(2, Coalesce(check, default='fallback', skip_exc=CheckError)) == 'fallback'
+    assert glom(2, Check(one_of=choices, default=None)) is None
+
+
+def test_check_single_choice_mapping_diagnostic():
+    with raises(CheckError) as exc_info:
+        glom(2, Check(one_of={0: 'not a choice'}))
+    assert exc_info.value.msgs == ['expected 0, found 2']
 
 
 

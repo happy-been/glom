@@ -333,6 +333,29 @@ def test_t_arithmetic():
     assert glom(t, -T) == -2
 
 
+def test_t_floor_division():
+    for target, divisor in [(7, 2), (-7, 2), (7, -2), (7.5, 2)]:
+        assert glom(target, T // divisor) == target // divisor
+    assert glom({'a': 7, 'b': 2}, T['a'] // T['b']) == 3
+    assert glom(7, (T // 2) + 1) == 4
+
+
+def test_t_floor_division_errors():
+    with raises(PathAccessError, match='zero'):
+        glom(7, T // 0)
+    with raises(PathAccessError, match='unsupported operand type'):
+        glom(None, T // 2)
+
+
+def test_t_floor_division_repr():
+    assert repr(T // 2) == 'T // 2'
+    assert repr(-(T // 2)) == '-(T // 2)'
+    assert repr(T + (T // 2)) == 'T + (T // 2)'
+    spec = T // (T // 2)
+    assert repr(spec) == 'T // (T // 2)'
+    assert glom(7, eval(repr(spec), {'T': T})) == glom(7, spec)
+
+
 def test_t_arithmetic_reprs():
     assert repr(T + T) == "T + T"
     assert repr(T + (T / 2 * (T - 5) % 4)) == "T + (T / 2 * (T - 5) % 4)"

@@ -1627,8 +1627,8 @@ def _t_eval(target, _t, scope):
                     cur = cur - arg
                 elif op == '*':
                     cur = cur * arg
-                #elif op == '#':
-                #    cur = cur // arg  # TODO: python 2 friendly approach?
+                elif op == '#':
+                    cur = cur // arg
                 elif op == '/':
                     cur = cur / arg
                 elif op == '%':
@@ -1747,16 +1747,16 @@ def _format_t(path, root=T):
         elif op == 'X':
             prepr.append(".__starstar__()")
         elif op in ('_', '~'):  # unary arithmetic operators
-            if any([o in path[:i] for o in '+-/%:&|^~_']):
+            if any([o in path[:i] for o in '+-/#%:&|^~_']):
                 prepr = ['('] + prepr + [')']
             prepr = ['-' if op == '_' else op] + prepr
         else:  # binary arithmetic operators
             formatted_arg = bbrepr(arg)
             if type(arg) is TType:
                 arg_path = arg.__ops__
-                if any([o in arg_path for o in '+-/%:&|^~_']):
+                if any([o in arg_path for o in '+-/#%:&|^~_']):
                     formatted_arg = '(' + formatted_arg + ')'
-            prepr.append(' ' + ('**' if op == ':' else op) + ' ')
+            prepr.append(' ' + ({':': '**', '#': '//'}.get(op, op)) + ' ')
             prepr.append(formatted_arg)
         i += 2
     return "".join(prepr)
